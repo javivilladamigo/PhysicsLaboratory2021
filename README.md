@@ -4,7 +4,7 @@
 
 ### Setting up a local repository
 
-The following itions need to be followed any time a new local repository is created. If you are working in a location where such repo already exists, what follows doesn't need to be repeated every time.
+The following instructions need to be followed any time a new local repository is created. If you are working in a location where such repo already exists, what follows doesn't need to be repeated every time.
 
    * Clone this repository (i.e. create a local repository cloned from this remote repository)
 
