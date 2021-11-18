@@ -1,0 +1,23 @@
+1. Calibrate the GAMMA SPECTRA (detectors 1, 2, 3 and 4). (Javi)
+
+2. Calibrate TAC. (Attilio)
+
+3. TWO PHOTONS DECAY (Attilio)
+	3.1 Set proper energy window for detector #1 and #2.
+	3.2 Set proper temporal window for TAC to reject uncorrelated events.
+	3.3 Verify that the energy in case of two photons is in agreement with the theory.
+	3.4 Display two-photon counts per unit of time.
+
+4. THREE PHOTONS DECAY (Javi)
+	4.1 Set proper energy window for detector #1, #2 and #3.
+	4.2 Set proper temporal window for TAC to reject uncorrelated events.
+	4.3 Verify that the energy in case of three photons is in agreement with the theory.
+	4.4 Display three-photon counts per unit of time.
+	
+5. COMPARISON between two-photon events and three-photon events and determine the RATIO. Roles of geometry and efficiency of detectors? Discuss the necessary corrections. 
+
+6. Compare the TIME SPECTRA measured in the two experimental configurations.
+
+7. Build the SUM SPECTRA for the two experimental configurations.
+
+8. Check DEAD TIME of the system and make any corrections to the results if needed.
