@@ -5,7 +5,7 @@
 // modify the corresponding channel (ch1) in the route variable (i.e. const char* route = "data/day1/ch1Calibration.root")
 // and always keep channel 1 in the call "TH1D *hist = getHistoForChannelFromTree(route, 1, bins, xMin, xMax)"
 
-void detectorCalibration(const char* route = "data/day1/ch4Calibration.root", Int_t npeaks = 2) {
+void detectorCalibration(const char* route = "data/day1/ch3Calibration.root", Int_t npeaks = 2) {
 	
 	//Style settings
 	gROOT->SetStyle("Default");
@@ -23,8 +23,8 @@ void detectorCalibration(const char* route = "data/day1/ch4Calibration.root", In
 
 	hist->SetTitle("");
 	hist->GetXaxis()->SetTitle("channel"); hist->GetYaxis()->SetTitle("counts");
-	hist->GetYaxis()->SetTitleOffset(1.5);
-
+	hist->GetXaxis()->SetRangeUser(0., 13000.);
+	hist->GetYaxis()->SetTitleOffset(1.25);
 	hist->Draw();
 	
 
@@ -48,7 +48,7 @@ void detectorCalibration(const char* route = "data/day1/ch4Calibration.root", In
 
 
 
-	TF1 *fun2, *fun1, *fit;
+	TF1 *fun1, *fun2, *fit;
 	for(Int_t i=0;i<nfound;i++)
 	{
 		xp = xpeaks[i];
@@ -61,7 +61,9 @@ void detectorCalibration(const char* route = "data/day1/ch4Calibration.root", In
 		fun2 = new TF1("fun2name","gaus(0)+pol1(3)", fun1->GetParameter(1)-(2.5*fun1->GetParameter(2)),fun1->GetParameter(1)+(2.5*fun1->GetParameter(2)));
 		fun2->SetParameters(fun1->GetParameter(0), fun1->GetParameter(1), fun1->GetParameter(2));
 		fun2->SetLineColor(kRed);
+
 		hfinal->Fit(fun2,"R+");
+
 
 		mean  = fun2->GetParameter(1);
 		sigma = fun2->GetParameter(2);
@@ -74,9 +76,8 @@ void detectorCalibration(const char* route = "data/day1/ch4Calibration.root", In
 		resolution[i]=((2.35*sigma)/mean)*100;
 		cout << "\nRESULTS:  Mean at: " << mean << " with sigma " << sigma << " , FWHM of " << 2.35*sigma << " , and resolution of " << resolution[i] << " %" << endl << endl;
 		cout << "\nThe fit shows a Chi2/Ndf = " << chi2/Ndf << endl;
-
-		}
-	
+	}
+		
 
 	//Calibration
 	Float_t xval[2];
@@ -100,7 +101,10 @@ void detectorCalibration(const char* route = "data/day1/ch4Calibration.root", In
 	TCanvas *cal_histo_can = new TCanvas("cal_histo_can","cal_histo_can");
 	hcal->Draw();
 	hcal->GetXaxis()->SetTitle("Photon energy [keV]");
-	hcal->GetXaxis()->CenterTitle();
+	hcal->GetXaxis()->SetRangeUser(0., cal_fn->Eval(13000.));
+	hcal->GetYaxis()->SetTitle("counts");
+	hcal->GetYaxis()->SetTitleOffset(1.25);
+
 
 }
 
