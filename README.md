@@ -1,39 +1,79 @@
-# Cloning a repository
-To grab a complete copy of another user's repository, use git clone like this:
+# PhysicsLaboratory2021
 
-`$ git clone https://github.com/javivilladamigo/PhysicsLaboratory2021.git`
+## Git instructions
 
-`# Clones a repository to your computer`
+### Setting up a local repository
 
-# Fetching changes from a remote repository
-Use `git fetch` to retrieve new work done by other people. Fetching from a repository grabs all the new remote-tracking branches and tags without merging those changes into your own branches.
+The following instructions need to be followed any time a new local repository is created. If you are working in a location where such repo already exists, what follows doesn't need to be repeated every time.
 
-If you already have a local repository with a remote URL set up for the desired project, you can grab all the new information by using git fetch *remotename* in the terminal:
+   * Clone this repository (i.e. create a local repository cloned from this remote repository)
 
-`$ git remote add upstream https://github.com/javivilladamigo/PhysicsLaboratory2021.git`
+   `git clone https://github.com/javivilladamigo/PhysicsLaboratory2021.git`
 
-`$ git fetch upstream`
+   A new directory will appear in your current directory. Get into it:
 
-`# Fetches updates made to a remote repository`
+   `cd PhysicsLaboratory2021/`
 
+   * Define the central PhysicsLaboratory2021 repo as the upstream repository:
 
-# Merging changes into your local branch
+   `git remote add upstream https://github.com/javivilladamigo/PhysicsLaboratory.git`
 
-Merging combines your local changes with changes made by others.
+   * Check that the previous commands succeeded:
 
-Typically, you'd merge a remote-tracking branch (i.e., a branch fetched from a remote repository) with your local branch:
+   `git remote -v`
 
+   * Get (fetch) the updates that have been done on the remote repository:
 
-`$ git merge upstream/main`
+   `git fetch upstream`
 
-`# Merges updates made online with your local work`
+  * The default branch is `main`. This is the branch you should point the pull request to. You should now create your development branch where you can edit and run the code. In order to set up a proper development cycle, you must create a branch (in the example below called `dev`) that *tracks* `upstream/dev`:
 
-# Pulling changes from a remote repository
+   `git branch -vv`
 
-`git pull` is a convenient shortcut for completing both git fetch and git merge in the same command:
+   `git checkout -b dev upstream/dev`
 
-`$ git pull upstream main`
+### Standard development cycle
 
-`# Grabs online updates and merges them with your local work`
+   * Before starting with the development you could check whether the upstream repository has been updated with respect to your forked version (that's likely to be the case prior to every lab class). If it had, then merge the changes into your main:
 
-Because `pull` performs a merge on the retrieved changes, you should ensure that your local work is committed before running the `pull` command. If you run into [a merge conflict](/github/collaborating-with-pull-requests/addressing-merge-conflicts/resolving-a-merge-conflict-using-the-command-line you cannot resolve, or if you decide to quit the merge, you can use `git merge --abort to take the branch back to where it was in before you pulled.
+   `git checkout main`
+   
+   `git fetch upstream`
+
+   `git merge upstream/main`
+   
+   * Then synch your development branch (especially in the case your pull request has been recently approved):
+   
+   `git checkout dev`
+
+   `git fetch upstream dev`
+
+   `git merge upstream/dev`
+
+   Be careful that the git syntax is inconsistent between fetch and merge. In the former you should use the whitespace to separate the repository and the branch name, in the latter you should use the slash character.
+
+   * The idea is that your main always reflects `upstream/main`, i.e. it keeps a local copy of the reference code as a starting point for your developments (i.e. solving the assigned problems). Note that in order to update your repository on GitHub, you need to push the local version to your remote repository.
+
+   * You may also need to get the updates from the main, i.e. need to merge the main:
+
+   `git merge main`
+
+   * Before starting to edit on the machine that you are using, type the follow command in order to update the directory with the last changes:
+  
+   `git pull`
+
+   * Now develop some code. Image you create a `<NewFile>`. Add the file to your local repository and stage it for commit (to unstage a file, use `git reset HEAD <NewFile>`)
+
+   `git add <NewFile>`
+
+   * Commits the (tracked) changes you made to the file(s) and commit them local repository on github
+
+   `git commit -m "Add existing file"`
+
+   (what follows after `-m` is a comment to keep track of the reason of the commit)
+
+   * Now propagate (push) your local changes to your remote repository on github (`origin`)
+
+   `git push origin dev`
+
+   * When appropriate, propagate your development also to the main repository (upstream). For that you need to go for a pull request, which is done from GitHub. Pay attention to set the correct starting and destination branches. This should be done from your dev branch, pointing towards the main repository. After that I will accept the pull request and commit the changes.
