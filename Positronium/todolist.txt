@@ -1,6 +1,6 @@
-1. Calibrate the GAMMA SPECTRA (detectors 1, 2, 3 and 4). (Javi)
+1. Calibrate the GAMMA SPECTRA (detectors 1, 2, 3 and 4). (Javi)  DONE
 
-2. Calibrate TAC. (Attilio)
+2. Calibrate TAC. (Attilio) DONE
 
 3. TWO PHOTONS DECAY (Attilio)
 	3.1 Set proper energy window for detector #1 and #2.
