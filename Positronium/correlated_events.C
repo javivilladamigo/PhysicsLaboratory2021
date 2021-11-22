@@ -12,7 +12,7 @@ struct slimport_data_t {
 Double_t cal1(Int_t ch) {return (-18.894 + ch*0.119077);}
 Double_t cal2(Int_t ch) {return (-28.3349 + ch*0.115687);}
 Double_t cal3(Int_t ch) {return (-25.3076 + ch*0.110853);}
-Double_t TAC_cal(Int_t ch) {return ((ch-12040)/84.74);}
+Double_t TAC_cal(Int_t ch) {return ((ch-12040)/84.74);} // real one 
 
 void correlated_events(const char *name_file = "data/day3/3gamma_filteredEvents.root", int bins = 16384, double xMin = 128, double xMax = 16384) {
     
@@ -54,7 +54,7 @@ void correlated_events(const char *name_file = "data/day3/3gamma_filteredEvents.
     TH1D *histD = new TH1D("histD", "TAC", bins, Tmin, Tmax);
 
     TCanvas *c5 = new TCanvas("c5", "sum_spectra");
-    TH1D *hist_sum = new TH1D("hist_sum", "E1+E2+E3", bins, 0, 4000);
+    TH1D *hist_sum = new TH1D("hist_sum", "", bins, 0, 4000);
 
     bool goodToGo = 0;
     // by now we should check we have the same number of entries in every branch
@@ -102,23 +102,42 @@ void correlated_events(const char *name_file = "data/day3/3gamma_filteredEvents.
 
         c1->cd();
         histA->Rebin(32);
+        histA->GetYaxis()->SetTitle("counts"); histA->GetXaxis()->SetTitle("Photon energy [keV]");
         histA->Draw();
 
         c2->cd();
         histB->Rebin(32);
+        histB->GetYaxis()->SetTitle("counts"); histB->GetXaxis()->SetTitle("Photon energy [keV]");
         histB->Draw();
 
         c3->cd();
         histC->Rebin(32);
+        histC->GetYaxis()->SetTitle("counts"); histC->GetXaxis()->SetTitle("Photon energy [keV]");
         histC->Draw();
 
         c4->cd();
         histD->Rebin(32);
+        histD->GetYaxis()->SetTitle("counts"); histD->GetXaxis()->SetTitle("Photon energy [keV]");
         histD->Draw();
 
         c5->cd();
-        hist_sum->Rebin(32);
+        hist_sum->Rebin(8);
+        hist_sum->GetYaxis()->SetTitle("counts"); hist_sum->GetXaxis()->SetTitle("Photon energy sum [keV]");
+        hist_sum->SetFillColorAlpha(kRed, 0.3);
+        hist_sum->GetXaxis()->SetRangeUser(722, 1322);
         hist_sum->Draw();
 
+        TF1 *gauss_plus_bg = new TF1("gauss_plus_bg","gaus(0)+pol1(3)", 900, 1122);
+		gauss_plus_bg->SetParameters(4, 1022, 24);
+		gauss_plus_bg->SetLineColor(kBlue);
+        hist_sum->Fit("gauss_plus_bg", "R+");
+
+        TF1 *fit = hist_sum->GetFunction("gauss_plus_bg");
+        Double_t chi2 = fit->GetChisquare();
+		Double_t Ndf = fit->GetNDF();
+
+        TLatex text;
+        text.DrawLatex(1100, 6.96053, Form("#color[4]{#chi^{2}/Ndf = %1.1f}", chi2/Ndf));
+        text.SetTextSize(0.0842105);
     }
 }
