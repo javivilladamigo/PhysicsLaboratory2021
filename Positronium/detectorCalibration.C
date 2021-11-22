@@ -104,8 +104,5 @@ void detectorCalibration(const char* route = "data/day1/ch3Calibration.root", In
 	hcal->GetXaxis()->SetRangeUser(0., cal_fn->Eval(13000.));
 	hcal->GetYaxis()->SetTitle("counts");
 	hcal->GetYaxis()->SetTitleOffset(1.25);
-
-
 }
-
 
