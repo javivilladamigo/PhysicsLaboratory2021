@@ -127,7 +127,7 @@ void correlated_events(const char *name_file = "data/day3/3gamma_filteredEvents.
         hist_sum->GetXaxis()->SetRangeUser(722, 1322);
         hist_sum->Draw();
 
-        TF1 *gauss_plus_bg = new TF1("gauss_plus_bg","gaus(0)+pol1(3)", 900, 1122);
+        TF1 *gauss_plus_bg = new TF1("gauss_plus_bg","gaus(0)+pol1(3)", 952, 1092);
 		gauss_plus_bg->SetParameters(4, 1022, 24);
 		gauss_plus_bg->SetLineColor(kBlue);
         hist_sum->Fit("gauss_plus_bg", "R+");

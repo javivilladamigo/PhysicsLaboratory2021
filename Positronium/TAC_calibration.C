@@ -65,7 +65,7 @@ void TAC_calibration(){
         hist->Fit(fun2,"R+");
 
         c1->SetLogy();
-        c1->SaveAs(Form("preliminary_plots/TAC_calibration_spectra/%i.pdf", i));
+        c1->SaveAs(Form("preliminary_plots/TAC_calibration/%i.pdf", i));
 
         means[i] = fun2->GetParameter(1);
         stdDev[i] = fun2->GetParameter(2);
