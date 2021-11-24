@@ -117,7 +117,7 @@ void correlated_events(const char *name_file = "data/day3/3gamma_filteredEvents.
 
         c4->cd();
         histD->Rebin(32);
-        histD->GetYaxis()->SetTitle("counts"); histD->GetXaxis()->SetTitle("Photon energy [keV]");
+        histD->GetYaxis()->SetTitle("counts"); histD->GetXaxis()->SetTitle("Delay [ns]");
         histD->Draw();
 
         c5->cd();
