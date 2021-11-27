@@ -5,10 +5,12 @@
 // modify the corresponding channel (ch1) in the route variable (i.e. const char* route = "data/day1/ch1Calibration.root")
 // and always keep channel 1 in the call "TH1D *hist = getHistoForChannelFromTree(route, 1, bins, xMin, xMax)"
 
-void detectorCalibration(const char* route = "data/day1/ch3Calibration.root", Int_t npeaks = 2) {
+void detectorCalibration(const char* route = "data/day1/ch4Calibration.root", Int_t npeaks = 2) {
 	
 	//Style settings
 	gROOT->SetStyle("Default");
+	gStyle->SetCanvasColor(0);
+	gStyle->SetStatBorderSize(1);
 	gStyle->SetOptFit(0);
 	gStyle->SetOptStat(0);
 	gStyle->SetPalette(0);
@@ -93,7 +95,7 @@ void detectorCalibration(const char* route = "data/day1/ch3Calibration.root", In
 	TCanvas *cal_can = new TCanvas("cal_can","cal_can");
 	cal_graph->Draw();
 
-	cout << endl << "The calibration has offset: " << cal_fn->GetParameter(1) << " and slope: " << cal_fn->GetParameter(0) << endl;
+	cout << endl << "The calibration has offset: " << cal_fn->GetParameter(1) << "+-" << cal_fn->GetParErrors()[1] << "; and slope: " << cal_fn->GetParameter(0) << "+-" << cal_fn->GetParErrors()[0] << endl;
 	//Re-escale the histogram X-axis with the calculated calibration
 	Float_t new_end = cal_fn->Eval(bins);
 	TH1F *hcal = new TH1F("hcal","",hist->GetNbinsX(),0,new_end); //create calibrated histo!!

@@ -71,7 +71,7 @@ void TAC_calibration(){
         stdDev[i] = fun2->GetParameter(2);
     }
 
-    Double_t delay[length] = {0, 3, 7, 15, 24, 56};
+    Double_t delay[length] = {2, 5, 9, 17, 26, 58};
 
     TCanvas *cal_can = new TCanvas("cal_can","cal_can");
     TGraph *cal_graph = new TGraph(length, means, delay);
