@@ -65,13 +65,13 @@ void TAC_calibration(){
         hist->Fit(fun2,"R+");
 
         c1->SetLogy();
-        c1->SaveAs(Form("preliminary_plots/TAC_calibration/%i.pdf", i));
+        c1->SaveAs(Form("preliminary_plots/TAC_calibration_spectra/%i.pdf", i));
 
         means[i] = fun2->GetParameter(1);
         stdDev[i] = fun2->GetParameter(2);
     }
 
-    Double_t delay[length] = {0, 3, 7, 15, 24, 56};
+    Double_t delay[length] = {2, 5, 9, 17, 26, 58};
 
     TCanvas *cal_can = new TCanvas("cal_can","cal_can");
     TGraph *cal_graph = new TGraph(length, means, delay);
