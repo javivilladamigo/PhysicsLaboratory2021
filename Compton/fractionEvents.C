@@ -9,7 +9,7 @@ void fractionEvents(TString detector_to_calibrate = "TAGGER") {
 	gStyle->SetCanvasColor(0);
 	gStyle->SetStatBorderSize(1);
 	gStyle->SetOptFit(0);
-	//gStyle->SetOptStat(0);
+	gStyle->SetOptStat(0);
 	gStyle->SetStatColor(0);
 	gStyle->SetPalette(0);
 	
@@ -39,60 +39,79 @@ void fractionEvents(TString detector_to_calibrate = "TAGGER") {
 	hist->SetTitle("");
 	hist->SetName("22Na spectrum");
 	hist->SetLineColor(kBlue);
-	hist->GetXaxis()->SetTitle("channel"); hist->GetYaxis()->SetTitle("counts");
+	hist->SetFillColorAlpha(kAzure + 7, 0.4);
+	hist->GetXaxis()->SetTitle("channel "); hist->GetYaxis()->SetTitle(Form("counts / %1.2f keV", hist->GetXaxis()->GetBinWidth(0)));
 
 	hist->GetYaxis()->SetTitleOffset(1.5);
 	
-	
 
-	TH1D *h_substracted = (TH1D*)hist->Clone();
-	for (Int_t i=0; i<hist->GetNbinsX(); i++)
-	{	
-		if (hist->GetBinContent(i) >= inferior_limit) h_substracted->SetBinContent(i, hist->GetBinContent(i) - inferior_limit);
-		else if (hist->GetBinContent(i) < inferior_limit) h_substracted->SetBinContent(i, 0);
-	}
-
-	TH1D *integral = (TH1D*)hist->Clone();
-	TH1D *white = (TH1D*)integral->Clone();
-
-	for (Int_t i=0; i<integral->GetNbinsX(); i++)
-	{	
-		if (integral->GetBinContent(i) >= inferior_limit) white->SetBinContent(i, inferior_limit);
-		else if (integral->GetBinContent(i) < inferior_limit) white->SetBinContent(i, integral->GetBinContent(i));
-	}
-
-
-	integral->GetXaxis()->SetRangeUser(left_limit, right_limit);
-	white->GetXaxis()->SetRangeUser(left_limit, right_limit);
-	//integral->GetYaxis()->SetRangeUser(inferior_limit, hist->GetNbinsY());
-	integral->SetLineWidth(0);
-	white->SetLineWidth(0);
-	white->SetFillColorAlpha(0, 1);
-	integral->SetFillColorAlpha(kRed, 0.5);
 
 	
 	hist->GetXaxis()->SetRangeUser(xMin, 25000);
-	hist->Draw();
-	integral->Draw("SAME");
-	white->Draw("SAME");
+
+	Double_t rangeFit[2] = {6500, 10000};
+	TF1 *gaus_plus_bg = new TF1("Gaussian + BG", "gaus(0)+pol1(3)", rangeFit[0], rangeFit[1]);
+
+	gaus_plus_bg->SetParameters(1, 8250);
+	gaus_plus_bg->SetParLimits(1, 7500, 9000);
+	gaus_plus_bg->SetParLimits(2, 0, 3000);
+
+	hist->Fit(gaus_plus_bg, "R+");
+	Double_t offset = gaus_plus_bg->GetParameter(3);
+	Double_t slope = gaus_plus_bg->GetParameter(4);
+
+	//TF1 *linear = new TF1("linear", "[0]+x*[1]", rangeFit[0], rangeFit[1]);
+	TF1 *gaus_fit = new TF1("Gaussian Fit", "gaus", rangeFit[0], rangeFit[1]);
+
+	gaus_fit->SetParameter(0, gaus_plus_bg->GetParameter(0));
+	gaus_fit->SetParameter(1, gaus_plus_bg->GetParameter(1));
+	gaus_fit->SetParameter(2, gaus_plus_bg->GetParameter(2));
+
+
+	//linear->SetParameter(0, offset);
+	//linear->SetParameter(1, slope);
+
+	//linear->SetLineColor(kOrange);
+	gaus_fit->SetLineColor(kRed);
+	gaus_fit->SetFillColorAlpha(kRed, 0.3);
+	gaus_fit->SetFillStyle(1001);
+	//linear->SetLineWidth(4);
+	//linear->Draw("SAME");
+	gaus_fit->Draw("SAME");
+
 	
-	Double_t A_511 = h_substracted->Integral(left_limit, right_limit);
+
+
+
+	Double_t A_511 = gaus_fit->Integral(rangeFit[0], rangeFit[1]) / hist->GetXaxis()->GetBinWidth(0);
 	Double_t A_tot = hist->GetEntries();
-
 	Double_t fraction = A_511/A_tot;
-	Double_t ufraction = fraction*TMath::Sqrt(1/A_511+1/A_tot);
+	Double_t ufraction = fraction*TMath::Sqrt(1/A_511 + 1/A_tot);
 
+	//grshade->Draw("SAME");
+
+	cout << A_511 << " " << A_tot << endl;
 	cout << "A(511)/Atot = " << fraction << " +/- " << ufraction << endl;
 	TLatex text;
 	text.SetTextSize(0.075);
-    text.DrawLatex(11320.38, 30000, Form("#frac{#color[2]{A_{511}}}{#color[4]{A_{tot}}} #color[1]{= %1.5f(%2.0f)}", fraction, ufraction*1e5));
+    text.DrawLatex(11320.38, 30000, Form("#frac{#color[2]{A_{511}}}{#color[4]{A_{tot}}} #color[1]{= %1.4f(%1.0f)}", fraction, 1e4*ufraction));
     
 
+
+
+
+	
+	TLegend *legend = new TLegend(0.532951, 0.806316, 0.951289, 0.966316);
+    legend->SetShadowColor(0);
+    legend->AddEntry(gaus_plus_bg, "Gaussian + BG fit","l"); //l draws the line;
+    legend->AddEntry(gaus_fit, "Gaussian fit","l"); // p draws the polymarker (see https://root.cern.ch/doc/master/classTLegend.html)
+	legend->SetTextSize(0.0526316);
+	legend->SetTextFont(62);
+    legend->Draw();
+    
 	TString save_route = "preliminary_plots/fraction_511keV_events/";
 	mkdir(save_route, 0777);
 	c1->SaveAs(save_route + string(detector_to_calibrate) + "_fraction_511keV_events.pdf");
-
-
 
 	/*
 	std::ofstream data;
