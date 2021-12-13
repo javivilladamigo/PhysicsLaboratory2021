@@ -91,7 +91,7 @@ void angularDependence()
     text4.DrawLatex(70, 50, Form("#color[4]{E_{#gamma} = %1.0f(%2.0f)}", Ee_th_fit->GetParameter(0), Ee_th_fit->GetParErrors()[0]));
 
     TLegend *legend = new TLegend(0.129062, 0.315072, 0.477733, 0.602371);
-    legend->SetTextSize(0.0354000);
+    legend->SetTextSize(0.034);
     //legend->SetHeader("The Legend Title","C"); // option "C" allows to center the header
     //legend->AddEntry(h1,"Histogram filled with random numbers","f");
     legend->AddEntry(graph_Ef, "Photon energy data", "p"); //l draws the line;
