@@ -64,13 +64,6 @@ void angularAnalysis(Int_t theta)
 {   
 
     //Style settings
-    Int_t MyPalette[100];
-    Double_t Red[]    = {0., 0.0, 1.0, 1.0, 1.0};
-    Double_t Green[]  = {0., 0.0, 0.0, 1.0, 1.0};
-    Double_t Blue[]   = {0., 1.0, 0.0, 0.0, 1.0};
-    Double_t Length[] = {0., .25, .50, .75, 1.0};
-    Int_t FI = TColor::CreateGradientColorTable(5, Length, Red, Green, Blue, 100);
-    for (int i=0;i<100;i++) MyPalette[i] = FI+i;
     gStyle->SetPalette(1);
 
     gStyle->SetTitleFont(62, "XYZ"); // title of axes
@@ -99,6 +92,29 @@ void angularAnalysis(Int_t theta)
     Double_t deltaTheta = (TMath::ATan(4. / 3.757) + TMath::ATan(8. / 26.)) / TMath::Pi() * 180; //TMath::ATan(4. / 26.) / TMath::Pi() * 180; // geometry definition for 260 mm of distance between SCATTERER and DETECTOR
     Double_t Ei, Ee, Ef; // energies of initial photon, electron and final phton
     Double_t Ei_min, Ei_max; // selection of energies in TAGGER
+
+    // peaks from the calibrated and filtered data (this was done by FitPanel manually, since it is more appropiate to fit visually in order to not take spurious contributions)
+    Double_t Ee_vec[6] = {35.6702, 55.1499, 93.5697, 155.887, 226.388, 246.219};
+    Double_t sigma_Ee_vec[6] = {10.3801, 30.3350, 30.5068, 52.1386, 52.9440, 39.3669};
+    Double_t Ef_vec[6] = {458.064, 441.250, 396.069, 349.047, 279.245, 267.993};
+    Double_t sigma_Ef_vec[6] = {21.2928, 27.2681, 41.5107, 35.5887, 34.2632, 30.7702};
+
+    Double_t E_SUM[6], sigma_SUM[6];
+
+    for (Int_t i = 0; i<6; i++)
+    {
+        E_SUM[i] = Ee_vec[i] + Ef_vec[i];
+        sigma_SUM[i] = TMath::Sqrt(sigma_Ee_vec[i]*sigma_Ee_vec[i] + sigma_Ef_vec[i]*sigma_Ef_vec[i]);
+    }
+
+    // identifier to know how much the sum has to be +- sigma
+    Int_t id;
+    if (theta == 0) id = 0;
+    else if (theta == 20) id = 1;
+    else if (theta == 40) id = 2;
+    else if (theta == 60) id = 3;
+    else if (theta == 90) id = 4;
+    else if (theta == 100) id = 5;
 
 
     // declaring calibrated histograms
@@ -131,7 +147,7 @@ void angularAnalysis(Int_t theta)
     }
     
     // declaring filtered histograms
-    TH1D *hist_TAGGER_filtered = selectionOfEvents(hist_TAGGER_cal, 500, 570, 3, &Ei_min, &Ei_max); // filtering the events in TAGGER within 3 sigma from the 511 peak
+    TH1D *hist_TAGGER_filtered = selectionOfEvents(hist_TAGGER_cal, 400, 570, 3, &Ei_min, &Ei_max); // filtering the events in TAGGER within 3 sigma from the 511 peak
     TH1D *hist_SCATTERER_filtered = (TH1D*)hist_SCATTERER_cal->Clone();
     TH1D *hist_DETECTOR_filtered = new TH1D("hist_DETECTOR_filtered", "Detector spectrum", bins, 0, cal_SCATTERER(xMax));
     
@@ -170,7 +186,10 @@ void angularAnalysis(Int_t theta)
         if ((Ei<Ei_max && Ei>Ei_min) && (Ee<Ee_max && Ee>Ee_min) && (indata_TAGGER.timetag == indata_SCATTERER.timetag) && (indata_SCATTERER.timetag == indata_DETECTOR.timetag))
         {
             hist_DETECTOR_filtered->Fill(Ef);
-            hist_correlation->Fill(Ee, Ef);
+            if (Ee+Ef < 40 + E_SUM[id] + 0.1*E_SUM[id] &&  Ee+Ef > 40 + E_SUM[id] - 0.1*E_SUM[id]) // selecting 
+                {
+                    hist_correlation->Fill(Ee, Ef);
+                }
         }
         
         
@@ -178,12 +197,12 @@ void angularAnalysis(Int_t theta)
 
     // format and plotting
     TCanvas *c1 = new TCanvas ("c1", "Events unfiltered");
-    c1->SetWindowSize(1920, 582);
+    c1->SetWindowSize(1920, 643);
     c1->Divide(3, 1);
 
     c1->cd(1);
     gPad->SetMargin(0.15881, 0.00358308, 0.100197, 0.0991254); // left right bottom top
-    hist_TAGGER_cal->Rebin(32);
+    hist_TAGGER_cal->Rebin(16);
     hist_TAGGER_cal->GetXaxis()->SetNdivisions(505, kTRUE);
     hist_TAGGER_cal->SetLineColor(kBlue);
 	hist_TAGGER_cal->SetFillColorAlpha(kAzure+7, 0.4);
@@ -193,7 +212,7 @@ void angularAnalysis(Int_t theta)
 
     c1->cd(2);
     gPad->SetMargin(0.15881, 0.00358308, 0.100197, 0.0991254); // left right bottom top
-    hist_SCATTERER_cal->Rebin(32);
+    hist_SCATTERER_cal->Rebin(16);
     hist_SCATTERER_cal->GetXaxis()->SetNdivisions(505, kTRUE);
     hist_SCATTERER_cal->SetLineColor(kBlue);
 	hist_SCATTERER_cal->SetFillColorAlpha(kAzure+7, 0.4);
@@ -203,7 +222,7 @@ void angularAnalysis(Int_t theta)
 
     c1->cd(3);
     gPad->SetMargin(0.15881, 0.00358308, 0.100197, 0.0991254); // left right bottom top
-    hist_DETECTOR_cal->Rebin(32);
+    hist_DETECTOR_cal->Rebin(16);
     hist_DETECTOR_cal->GetXaxis()->SetNdivisions(505, kTRUE);
     hist_DETECTOR_cal->SetLineColor(kBlue);
 	hist_DETECTOR_cal->SetFillColorAlpha(kAzure+7, 0.4);
@@ -211,13 +230,19 @@ void angularAnalysis(Int_t theta)
     hist_DETECTOR_cal->GetXaxis()->SetTitle("Energy [keV]");
     hist_DETECTOR_cal->Draw();
 
+    TString save_route = "preliminary_plots/angularAnalysis/";
+
+	mkdir(save_route, 0777);
+    if (theta == 100) c1->SaveAs(save_route + theta + "deg_unfilteredEvents.pdf");
+    else c1->SaveAs(save_route + "0" + theta + "deg_unfilteredEvents.pdf");
+
     TCanvas *c2 = new TCanvas("c2", "Events filtered");
-    c2->SetWindowSize(1920, 582);
+    c2->SetWindowSize(1920, 643);
     c2->Divide(3, 1);
 
     c2->cd(1);
     gPad->SetMargin(0.15881, 0.00358308, 0.100197, 0.0991254); // left right bottom top
-    hist_TAGGER_filtered->Rebin(32);
+    hist_TAGGER_filtered->Rebin(16);
     hist_TAGGER_filtered->GetXaxis()->SetNdivisions(505, kTRUE);
     hist_TAGGER_filtered->SetLineColor(kBlue);
 	hist_TAGGER_filtered->SetFillColorAlpha(kAzure+7, 0.4);
@@ -227,7 +252,7 @@ void angularAnalysis(Int_t theta)
 
     c2->cd(2);
     gPad->SetMargin(0.15881, 0.00358308, 0.100197, 0.0991254); // left right bottom top
-    hist_SCATTERER_filtered->Rebin(32);
+    hist_SCATTERER_filtered->Rebin(16);
     hist_SCATTERER_filtered->GetXaxis()->SetNdivisions(505, kTRUE);
     hist_SCATTERER_filtered->SetLineColor(kBlue);
 	hist_SCATTERER_filtered->SetFillColorAlpha(kAzure+7, 0.4);
@@ -237,31 +262,49 @@ void angularAnalysis(Int_t theta)
 
     c2->cd(3);
     gPad->SetMargin(0.15881, 0.00358308, 0.100197, 0.0991254); // left right bottom top
-    hist_DETECTOR_filtered->Rebin(32);
+    hist_DETECTOR_filtered->Rebin(16);
     hist_DETECTOR_filtered->GetXaxis()->SetNdivisions(505, kTRUE);
     hist_DETECTOR_filtered->SetLineColor(kBlue);
 	hist_DETECTOR_filtered->SetFillColorAlpha(kAzure+7, 0.4);
     hist_DETECTOR_filtered->GetYaxis()->SetTitle(Form("counts / %1.2f keV", hist_DETECTOR_filtered->GetXaxis()->GetBinWidth(0)));
     hist_DETECTOR_filtered->GetXaxis()->SetTitle("Energy [keV]");
     hist_DETECTOR_filtered->Draw();
-
+    if (theta == 100) c2->SaveAs(save_route + theta + "deg_filteredEvents.pdf");
+    else c2->SaveAs(save_route + "0" + theta + "deg_filteredEvents.pdf");
 
     TCanvas *c3 = new TCanvas("c3", "Correlated Events");
-    c3->SetWindowSize(1080, 1080);
-    c3->cd();
-    gPad->SetMargin(0.15881, 0.05, 0.100197, 0.0991254); // left right bottom top
+    c3->Divide(2, 1);
+    c3->cd(1)->SetMargin(0.15881, 0.05, 0.100197, 0.0991254); // left right bottom top
     hist_correlation->GetYaxis()->SetTitle("Detector energy [keV]");
     hist_correlation->GetXaxis()->SetTitle("Scatterer energy [keV]");
     hist_correlation->GetZaxis()->SetTitle(Form("counts / %1.2f keV", hist_DETECTOR_filtered->GetXaxis()->GetBinWidth(0)));
-    hist_correlation->SetMinimum(14);
     hist_correlation->Rebin2D(16, 16);
     hist_correlation->Draw("lego2");
-    hist_correlation->GetXaxis()->SetRangeUser(0, 520);
-    hist_correlation->GetYaxis()->SetRangeUser(0, 520);
-    cout << hist_correlation->GetEntries() << endl;
+    hist_correlation->GetXaxis()->SetRangeUser(0, 550);
+    hist_correlation->GetYaxis()->SetRangeUser(0, 550);
 
+    c3->cd(2);
+    c3->cd(2)->SetLeftMargin(0.15881);
+    hist_correlation->Draw("colz");
+    hist_correlation->GetXaxis()->SetRangeUser(0, 550);
+    hist_correlation->GetYaxis()->SetRangeUser(0, 550);
 
-    TString save_route = "preliminary_plots/angularAnalysis/";
-	mkdir(save_route, 0777);
-	c1->SaveAs(save_route + theta + ".pdf");
+    TF1 *lin = new TF1("fun1name", "pol1", 0, 550);
+    hist_correlation->Fit(lin, "RN");
+    Double_t p0 = lin->GetParameter(0);
+    Double_t up0 = lin->GetParErrors()[0];
+    Double_t p1 = lin->GetParameter(1);
+    Double_t up1 = lin->GetParErrors()[1];
+
+    lin->SetLineColor(1);
+    lin->SetLineWidth(3);
+    lin->SetLineStyle(9);
+    lin->Draw("SAME");
+
+    TLatex text;
+	text.SetTextSize(0.05);
+    text.DrawLatex(50., 50., Form("E_{De} =  %1.0f(%1.0f) - %1.2f(%1.0f) #upoint E_{Sc}", p0, up0, -p1, up1*100));
+    if (theta == 100) c3->SaveAs(save_route + theta + "deg_correlation.pdf");
+    else c3->SaveAs(save_route + "0" + theta + "deg_correlation.pdf");
+
 }
