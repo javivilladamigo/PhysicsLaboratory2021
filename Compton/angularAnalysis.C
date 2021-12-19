@@ -197,7 +197,7 @@ void angularAnalysis(Int_t theta)
 
     // format and plotting
     TCanvas *c1 = new TCanvas ("c1", "Events unfiltered");
-    c1->SetWindowSize(1920, 643);
+    c1->SetWindowSize(1440, 494);
     c1->Divide(3, 1);
 
     c1->cd(1);
@@ -237,7 +237,7 @@ void angularAnalysis(Int_t theta)
     else c1->SaveAs(save_route + "0" + theta + "deg_unfilteredEvents.pdf");
 
     TCanvas *c2 = new TCanvas("c2", "Events filtered");
-    c2->SetWindowSize(1920, 643);
+    c2->SetWindowSize(1440, 494);
     c2->Divide(3, 1);
 
     c2->cd(1);
@@ -290,11 +290,13 @@ void angularAnalysis(Int_t theta)
     hist_correlation->GetYaxis()->SetRangeUser(0, 550);
 
     TF1 *lin = new TF1("fun1name", "pol1", 0, 550);
-    hist_correlation->Fit(lin, "RN");
+    hist_correlation->Fit(lin, "RNFC");
     Double_t p0 = lin->GetParameter(0);
     Double_t up0 = lin->GetParErrors()[0];
     Double_t p1 = lin->GetParameter(1);
     Double_t up1 = lin->GetParErrors()[1];
+    Double_t chi2_lin = lin->GetChisquare();
+    Double_t NDf_lin = lin->GetParErrors()[1];
 
     lin->SetLineColor(1);
     lin->SetLineWidth(3);
@@ -304,6 +306,11 @@ void angularAnalysis(Int_t theta)
     TLatex text;
 	text.SetTextSize(0.05);
     text.DrawLatex(50., 50., Form("E_{De} =  %1.0f(%1.0f) - %1.2f(%1.0f) #upoint E_{Sc}", p0, up0, -p1, up1*100));
+
+    TLatex text2;
+	text2.SetTextSize(0.05);
+    text2.DrawLatex(50., 100., Form("#chi^{2}/NDf = %1.1f", chi2_lin / (hist_correlation->GetEntries() - 2)));
+
     if (theta == 100) c3->SaveAs(save_route + theta + "deg_correlation.pdf");
     else c3->SaveAs(save_route + "0" + theta + "deg_correlation.pdf");
 
