@@ -50,6 +50,10 @@
         "typeinfo": "cpp",
         "fractionEvents.C": "cpp",
         "correlated_events.C": "cpp",
-        "rango_energia_unica.C": "cpp"
+        "rango_energia_unica.C": "cpp",
+        "angularAnalysis.C": "cpp",
+        "angularDependence.C": "cpp",
+        "Mytool_2s13_APD292_379V8_ESR_frontal.C": "cpp",
+        "rango_multiple.C": "cpp"
     }
 }
