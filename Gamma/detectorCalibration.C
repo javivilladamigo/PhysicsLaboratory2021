@@ -28,7 +28,7 @@ void calibrationCo(TString detector_to_calibrate, Int_t npeaks = 2, Float_t *mea
 
 	TH1D *hist = getHistoForChannelFromTree(route, chan, bins, 0, xMax);
 	
-	hist->Rebin(16); //rebinin for a better visualization and peak finding
+	hist->Rebin(32); //rebinin for a better visualization and peak finding
 	hist->SetTitle("");
 	hist->GetXaxis()->SetTitle("channel "); hist->GetYaxis()->SetTitle(Form("counts / %1.2f keV", hist->GetXaxis()->GetBinWidth(0)));
 	hist->GetXaxis()->SetRangeUser(xMin, xMax);
@@ -73,6 +73,9 @@ void calibrationCo(TString detector_to_calibrate, Int_t npeaks = 2, Float_t *mea
 		
 		mean[i] = fun2->GetParameter(1);
 		sigma[i] = fun2->GetParameter(2);
+		cout << "\n**************** Peak " << mean[i] << " ch **************** "  << endl;
+		cout << "Mean = " << mean[i]  << " +/- " <<  fun2->GetParErrors()[1] << endl;
+		cout << "Sigma = " << sigma[i] << " +/- " << fun2->GetParErrors()[2] << endl;
 	}
 	*meanCo1 = mean[0];
 	*meanCo2 = mean[1];
@@ -143,6 +146,9 @@ void calibrationAm(TString detector_to_calibrate, Int_t npeaks = 1, Float_t *mea
 
 		*meanAm = fun2->GetParameter(1);
 		*sigmaAm = fun2->GetParameter(2);
+		cout << "\n**************** Peak " << *meanAm << " ch **************** "  << endl;
+		cout << "Mean = " << *meanAm << " +/- " <<  fun2->GetParErrors()[1] << endl;
+		cout << "Sigma = " << *sigmaAm << " +/- " <<  fun2->GetParErrors()[2] << endl;
 	}
 }
 

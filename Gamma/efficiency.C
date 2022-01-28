@@ -11,10 +11,14 @@ void efficiency(TString detector)
     //Style settings
 	gROOT->SetStyle("Default");
 	gStyle->SetCanvasColor(0);
+    gStyle->SetStatColor(0);
 	gStyle->SetStatBorderSize(1);
-	gStyle->SetOptFit(0000);
-	gStyle->SetOptStat("");
+    gStyle->SetLabelFont(62, "XY");
+    gStyle->SetLegendFont(62);
+    gStyle->SetTitleFont(62, "XY");
+    gStyle->SetOptFit(111);
 	gStyle->SetPalette(0);
+    gStyle->SetOptStat(0);
 
     // Activity data
     Float_t BR_Co1 = 0.9988;
@@ -50,7 +54,10 @@ void efficiency(TString detector)
     Int_t topCh = int(TMath::Power(2, 12));
 	Int_t bins = topCh;
     Int_t xMin, xMax;
-    Float_t yMin = 0, yMax = 15;
+    Float_t yMin, yMax;
+
+    if (detector == "NaI") yMin = 0, yMax = 9;
+    if (detector == "HPGe") yMin = 0, yMax = 15;
 
 
 
@@ -97,7 +104,7 @@ void efficiency(TString detector)
         TCanvas *c2 = new TCanvas("c2", "Subtracted background spectrum");
         hclone_Co->Add(hclone_Co,hb,1,-1); //substracting background from initial spectrum
         TH1D *hfinal_Co = (TH1D*)hclone_Co->Clone();
-        for (Int_t i = 0; i<hfinal_Co->GetEntries(); i++)
+        for (Int_t i = 0; i<hfinal_Co->GetNbinsX(); i++)
         {
             if (hfinal_Co->GetBinContent(i) < 0) hfinal_Co->SetBinContent(i, 0);
         }
@@ -183,7 +190,7 @@ void efficiency(TString detector)
         TCanvas *c4 = new TCanvas("c4", "Subtracted background spectrum");
         hclone_Am->Add(hclone_Am, hb, 1, -1); //substracting background from initial spectrum
         TH1D *hfinal_Am = (TH1D*)hclone_Am->Clone();
-        for (Int_t i = 0; i<hfinal_Am->GetEntries(); i++)
+        for (Int_t i = 0; i<hfinal_Am->GetNbinsX(); i++)
         {
             if (hfinal_Am->GetBinContent(i) < 0) hfinal_Am->SetBinContent(i, 0);
         }
@@ -275,7 +282,7 @@ void efficiency(TString detector)
         TCanvas *c2 = new TCanvas("c2", "Subtracted background spectrum");
         hclone_Co->Add(hclone_Co,hb,1,-1); //substracting background from initial spectrum
         TH1D *hfinal_Co = (TH1D*)hclone_Co->Clone();
-        for (Int_t i = 0; i<hfinal_Co->GetEntries(); i++)
+        for (Int_t i = 0; i<hfinal_Co->GetNbinsX(); i++)
         {
             if (hfinal_Co->GetBinContent(i) < 0) hfinal_Co->SetBinContent(i, 0);
         }
@@ -360,7 +367,7 @@ void efficiency(TString detector)
         TCanvas *c4 = new TCanvas("c4", "Subtracted background spectrum");
         hclone_Am->Add(hclone_Am, hb, 1, -1); //substracting background from initial spectrum
         TH1D *hfinal_Am = (TH1D*)hclone_Am->Clone();
-        for (Int_t i = 0; i<hfinal_Am->GetEntries(); i++)
+        for (Int_t i = 0; i<hfinal_Am->GetNbinsX(); i++)
         {
             if (hfinal_Am->GetBinContent(i) < 0) hfinal_Am->SetBinContent(i, 0);
         }
@@ -408,18 +415,35 @@ void efficiency(TString detector)
 
     TCanvas *c5 = new TCanvas("c5", "Intrinsic efficiency");
     c5->SetLeftMargin(0.11749);
-    c5->SetRightMargin(0.0544413);
+    c5->SetRightMargin(0.0344413);
     c5->SetBottomMargin(0.101053);
-    c5->SetTopMargin(0.0336842);
+    c5->SetTopMargin(0.0302198);
     TH2F *h = new TH2F("h", ";Photon energy [keV];Intrinsic efficiency [%]",  1000, 0, 1400, 1000, yMin, yMax);
     h->GetYaxis()->SetTitleOffset(1.25);
     h->Draw();
+
     TGraphErrors *efficiency_graph = new TGraphErrors(3, energy, efficiency, 0, uefficiency); //calibration: channel vs energy of the found peaks
     efficiency_graph->SetMarkerStyle(20);
     efficiency_graph->SetMarkerColor(1);
     h->GetXaxis()->SetRangeUser(0, 1400);
     efficiency_graph->Draw("P");
 
+    TF1 *square_law = new TF1("square_law", "[0] + [1] / TMath::Sqrt(x)", 0, 1500);
+    square_law->SetLineColor(kRed);
+    square_law->SetLineWidth(2);
+    efficiency_graph->Fit(square_law, "R+");
+    gPad->Update();
+
+    Float_t eff_at_1408 = square_law->Eval(1408);
+    cout << "The absolute intrinsic efficiency at 1408 keV is: " << eff_at_1408 << endl;
+    TPaveStats *st = (TPaveStats*)efficiency_graph->FindObject("stats");
+    st->SetX1NDC(0.590258); //new x start position
+    st->SetY1NDC(0.787472); //new y start position
+    st->SetX2NDC(0.951289); //new x end position
+    st->SetY2NDC(0.946309); //new y end position
+
+
+    
 
     gSystem->Exec("mkdir preliminary_plots/");
 	gSystem->Exec("mkdir preliminary_plots/efficiency");
